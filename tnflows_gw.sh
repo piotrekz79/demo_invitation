@@ -1,5 +1,8 @@
 #!/bin/bash
 
+TS_IP=134.221.121.204
+TN_IP=134.221.121.202
+
 #WARNING: we have to guess gre port number
 #it is not simply the last+1 because we have eth10 already added :/
 #remedy: in mininet add pinghost first, then rest of the links, 
@@ -9,7 +12,7 @@ NPORTS=`sudo ovs-vsctl list-ports tn-gw-ts | wc -l`
 
 #and then sudo ...output:$((NPORTS+1))
 
-sudo ovs-vsctl add-port tn-gw-ts tn-gw-ts-gre1 -- set interface tn-gw-ts-gre1 type=gre options:remote_ip=134.221.121.204 options:local_ip=134.221.121.203
+sudo ovs-vsctl add-port tn-gw-ts tn-gw-ts-gre1 -- set interface tn-gw-ts-gre1 type=gre options:remote_ip=${TS_IP} options:local_ip=${TN_IP}
 
 GRE_TN_TS=$((NPORTS+1))
 #commented out because we have to use gateway switch
