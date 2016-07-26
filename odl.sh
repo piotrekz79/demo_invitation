@@ -1,4 +1,8 @@
 #!/bin/bash
 
-cd /home/coco/vpnservice-karaf-intent/distribution-karaf-0.4.2-Berylium-SR2-clean/bin
+#runs controller where
+#feature:install odl-vpnservice-intent
+#was done
+
+cd ~/distribution-karaf-0.4.2-Beryllium-SR2-vpnintent/bin/
 sudo ./karaf
