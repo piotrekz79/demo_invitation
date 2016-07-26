@@ -1,3 +1,7 @@
+#!/bin/bash
+
+TS_IP=134.221.121.204
+TN_IP=134.221.121.202
 
 
 #WARNING: we have to guess gre port number
@@ -10,7 +14,7 @@ NPORTS=`sudo ovs-vsctl list-ports ts-gw-tn | wc -l`
 #and then sudo ...output:$((NPORTS+1))
 
 GRE_TS_TN=$((NPORTS+1))
-sudo ovs-vsctl add-port ts-gw-tn ts-gw-tn-gre1 -- set interface ts-gw-tn-gre1 type=gre options:remote_ip=134.221.121.203 options:local_ip=134.221.121.204 options:link_speed=1G
+sudo ovs-vsctl add-port ts-gw-tn ts-gw-tn-gre1 -- set interface ts-gw-tn-gre1 type=gre options:remote_ip=${TN_IP} options:local_ip=${TS_IP} options:link_speed=1G
 
 #sudo ovs-ofctl add-flow ts-pe1 -O OpenFlow13 ip,in_port=${GRE_TS_TN},nw_src=10.0.0.3,nw_dst=10.0.0.4,actions=output:1
 #sudo ovs-ofctl add-flow ts-pe1 -O OpenFlow13 ip,in_port=1,nw_src=10.0.0.4,nw_dst=10.0.0.3,actions=output:${GRE_TS_TN}
