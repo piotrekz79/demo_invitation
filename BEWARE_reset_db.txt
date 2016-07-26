@@ -8,5 +8,5 @@ GRANT ALL PRIVILEGES ON CoCoINV.* TO 'coco'@'localhost';
 
 exit
 
-mysql -u root -p CoCoBBF < /home/coco/demo_bbf/demo_bbf_clean.sql
+mysql -u root -p CoCoINV < /home/coco/demo_invitation/cocoinv_clean.sql
 
