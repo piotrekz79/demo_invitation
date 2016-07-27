@@ -121,25 +121,25 @@ class MDCoCoTopoNorth(Topo):
     def build(self):
         domID = 2
 
-        tn_pe1 = self.addSwitch('tn-pe1', dpid='0000000000000021', datapath='user')
-        tn_pc1 = self.addSwitch('tn-pc1', dpid='0000000000000022', datapath='user')
-        tn_pe2 = self.addSwitch('tn-pe2', dpid='0000000000000023', datapath='user')
-        tn_gw_ts = self.addSwitch('tn-gw-ts', dpid='0000000000000024')
+        tn_pe1 = self.addSwitch('tn_pe1', dpid='0000000000000021', datapath='user')
+        tn_pc1 = self.addSwitch('tn_pc1', dpid='0000000000000022', datapath='user')
+        tn_pe2 = self.addSwitch('tn_pe2', dpid='0000000000000023', datapath='user')
+        tn_gw_ts = self.addSwitch('tn_gw_ts', dpid='0000000000000024')
 
-        # tn_pe1 = self.addSwitch('tn-pe1', dpid='0000000000000021')
-        # tn_pc1 = self.addSwitch('tn-pc1', dpid='0000000000000022')
-        # tn_pe2 = self.addSwitch('tn-pe2', dpid='0000000000000023')
+        # tn_pe1 = self.addSwitch('tn_pe1', dpid='0000000000000021')
+        # tn_pc1 = self.addSwitch('tn_pc1', dpid='0000000000000022')
+        # tn_pe2 = self.addSwitch('tn_pe2', dpid='0000000000000023')
 
         # [PZ] perhaps we will add s4 later; now we want to avoid loop problems
         #        s4 = self.addSwitch('s4', dpid='0000000000000004')
 
         # add pingable hosts at the edges
         # TODO : for any kind of multihoming pingable hosts should have a dictionary of arp entries, not just one?
-        pinghost = self.addHost('tn-ph-sn', cls=PingableHost, ip='10.0.0.2/24', mac='00:10:00:00:00:02',
+        pinghost = self.addHost('tn_ph_sn', cls=PingableHost, ip='10.0.0.2/24', mac='00:10:00:00:00:02',
                                 remoteIP='10.0.0.1', remoteMAC='00:10:00:00:00:01')
         self.addLink(tn_pe1, pinghost)
 
-        pinghost = self.addHost('tn-ph-ts', cls=PingableHost, ip='10.0.0.3/24', mac='00:10:00:00:00:03',
+        pinghost = self.addHost('tn_ph_ts', cls=PingableHost, ip='10.0.0.3/24', mac='00:10:00:00:00:03',
                                 remoteIP='10.0.0.4', remoteMAC='00:10:00:00:00:04')
         self.addLink(tn_pe2, pinghost)
 
@@ -154,38 +154,38 @@ class MDCoCoTopoNorth(Topo):
         bgpEth0 = {'mac': '00:10:0%s:00:02:54' % domID,
                    'ipAddrs': '10.%s.0.254/24' % domID}
         bgpEth1 = {'ipAddrs': '10.10.10.1/24'}
-        bgpIntfs = {'tn-bgp1-eth0': bgpEth0,
-                    'tn-bgp1-eth1': bgpEth1}
+        bgpIntfs = {'tn_bgp1-eth0': bgpEth0,
+                    'tn_bgp1-eth1': bgpEth1}
 
         ts_bgp1 = {'remoteMAC': '00:10:03:00:02:54',
                    'remoteIP': '10.3.0.254',
                    'remoteMask': '/32',
-                   'localdev': 'tn-bgp1-eth0'}
+                   'localdev': 'tn_bgp1-eth0'}
 
         # TODO sould be generated!!
         tn_ce1_arp = {'remoteMAC': '00:10:02:00:00:01',
                       'remoteIP': '10.2.0.1',
                       'remoteMask': '/32',
-                      'localdev': 'tn-bgp1-eth0'}
+                      'localdev': 'tn_bgp1-eth0'}
 
         # TODO sould be generated!!
         tn_ce2_arp = {'remoteMAC': '00:10:02:00:00:02',
                       'remoteIP': '10.2.0.2',
                       'remoteMask': '/32',
-                      'localdev': 'tn-bgp1-eth0'}
+                      'localdev': 'tn_bgp1-eth0'}
 
-        ARPBGPpeers = {'ts-bgp1': ts_bgp1,
+        ARPBGPpeers = {'ts_bgp1': ts_bgp1,
                        'tn_ce1_arp': tn_ce1_arp,
                        'tn_ce2_arp': tn_ce2_arp}
 
-        bgp = self.addHost("tn-bgp1", cls=Router,
-                           quaggaConfFile='%s/tn-bgp1.conf' % CONFIG_DIR,
+        bgp = self.addHost("tn_bgp1", cls=Router,
+                           quaggaConfFile='%s/tn_bgp1.conf' % CONFIG_DIR,
                            zebraConfFile=zebraConf,
                            intfDict=bgpIntfs,
                            ARPDict=ARPBGPpeers)
 
         for i in range(1, nRouters + 1):
-            name = 'tn-ce%s' % i
+            name = 'tn_ce%s' % i
             # drop vlans
             #            eth0 = { 'mac' : '00:10:0%s:00:00:0%s' % (domID, i),
             #                     'ipAddrs' : '10.%s.0.%s/24' % (domID, i),
@@ -205,7 +205,7 @@ class MDCoCoTopoNorth(Topo):
 
             ARPfakegw = {'bgpgw': bgpgw}
 
-            quaggaConf = '%s/tn-ce%s.conf' % (CONFIG_DIR, i)
+            quaggaConf = '%s/tn_ce%s.conf' % (CONFIG_DIR, i)
 
             router = self.addHost(name, cls=Router, quaggaConfFile=quaggaConf,
                                   zebraConfFile=zebraConf, intfDict=intfs, ARPDict=ARPfakegw)
@@ -213,10 +213,10 @@ class MDCoCoTopoNorth(Topo):
 
             # learning switch sitting in each customer AS
             # you may need 'sudo apt-get install bridge-utils' for this:
-            sw = self.addSwitch('tn-s%s' % i, cls=LinuxBridge)
+            sw = self.addSwitch('tn_s%s' % i, cls=LinuxBridge)
 
             for j in range(1, nHosts + 1):
-                host = self.addHost('tn-h%s%s' % (i, j), cls=SdnIpHost, ip='10.%s.%s.%s/24' % (domID, i, j),
+                host = self.addHost('tn_h%s%s' % (i, j), cls=SdnIpHost, ip='10.%s.%s.%s/24' % (domID, i, j),
                                     route='10.%s.%s.254' % (domID, i))
                 self.addLink(host, sw)
 
@@ -257,12 +257,12 @@ class MDCoCoTopoSouth(Topo):
     def build(self):
         domID = 3
 
-        ts_pe1 = self.addSwitch('ts-pe1', dpid='0000000000000001', datapath='user')
-        #        ts_pc1 = self.addSwitch('ts-pc1', dpid='0000000000000002')
-        #        ts_pe2 = self.addSwitch('ts-pe2', dpid='0000000000000003')
-        ts_gw_tn = self.addSwitch('ts-gw-tn', dpid='0000000000000024')
+        ts_pe1 = self.addSwitch('ts_pe1', dpid='0000000000000001', datapath='user')
+        #        ts_pc1 = self.addSwitch('ts_pc1', dpid='0000000000000002')
+        #        ts_pe2 = self.addSwitch('ts_pe2', dpid='0000000000000003')
+        ts_gw_tn = self.addSwitch('ts_gw_tn', dpid='0000000000000024')
 
-        pinghost = self.addHost('ts-ph-tn', cls=PingableHost, ip='10.0.0.4/24', mac='00:10:00:00:00:04',
+        pinghost = self.addHost('ts_ph_tn', cls=PingableHost, ip='10.0.0.4/24', mac='00:10:00:00:00:04',
                                 remoteIP='10.0.0.3', remoteMAC='00:10:00:00:00:03')
         self.addLink(ts_pe1, pinghost)
 
@@ -277,31 +277,31 @@ class MDCoCoTopoSouth(Topo):
         bgpEth0 = {'mac': '00:10:0%s:00:02:54' % domID,
                    'ipAddrs': '10.%s.0.254/24' % domID}
         bgpEth1 = {'ipAddrs': '10.10.10.1/24'}
-        bgpIntfs = {'ts-bgp1-eth0': bgpEth0,
-                    'ts-bgp1-eth1': bgpEth1}
+        bgpIntfs = {'ts_bgp1-eth0': bgpEth0,
+                    'ts_bgp1-eth1': bgpEth1}
 
         tn_bgp1 = {'remoteMAC': '00:10:02:00:02:54',
                    'remoteIP': '10.2.0.254',
                    'remoteMask': '/32',
-                   'localdev': 'ts-bgp1-eth0'}
+                   'localdev': 'ts_bgp1-eth0'}
 
         # TODO sould be generated!!
         ts_ce1_arp = {'remoteMAC': '00:10:03:00:00:01',
                       'remoteIP': '10.3.0.1',
                       'remoteMask': '/32',
-                      'localdev': 'ts-bgp1-eth0'}
+                      'localdev': 'ts_bgp1-eth0'}
 
-        ARPBGPpeers = {'tn-bgp1': tn_bgp1,
-                       'ts-ce1': ts_ce1_arp}
+        ARPBGPpeers = {'tn_bgp1': tn_bgp1,
+                       'ts_ce1': ts_ce1_arp}
 
-        bgp = self.addHost("ts-bgp1", cls=Router,
-                           quaggaConfFile='%s/ts-bgp1.conf' % CONFIG_DIR,
+        bgp = self.addHost("ts_bgp1", cls=Router,
+                           quaggaConfFile='%s/ts_bgp1.conf' % CONFIG_DIR,
                            zebraConfFile=zebraConf,
                            intfDict=bgpIntfs,
                            ARPDict=ARPBGPpeers)
 
         for i in range(1, nRouters + 1):
-            name = 'ts-ce%s' % i
+            name = 'ts_ce%s' % i
 
             # drop vlans
             #            eth0 = { 'mac' : '00:10:0%s:00:00:0%s' % (domID, i),
@@ -323,7 +323,7 @@ class MDCoCoTopoSouth(Topo):
 
             ARPfakegw = {'bgpgw': bgpgw}
 
-            quaggaConf = '%s/ts-ce%s.conf' % (CONFIG_DIR, i)
+            quaggaConf = '%s/ts_ce%s.conf' % (CONFIG_DIR, i)
 
             router = self.addHost(name, cls=Router, quaggaConfFile=quaggaConf,
                                   zebraConfFile=zebraConf, intfDict=intfs, ARPDict=ARPfakegw)
@@ -331,10 +331,10 @@ class MDCoCoTopoSouth(Topo):
 
             # learning switch sitting in each customer AS
             # you may need sudo apt-get install bridge-utils for this:
-            sw = self.addSwitch('ts-s%s' % i, cls=LinuxBridge)
+            sw = self.addSwitch('ts_s%s' % i, cls=LinuxBridge)
 
             for j in range(1, nHosts + 1):
-                host = self.addHost('ts-h%s%s' % (i, j), cls=SdnIpHost, ip='10.%s.%s.%s/24' % (domID, i, j),
+                host = self.addHost('ts_h%s%s' % (i, j), cls=SdnIpHost, ip='10.%s.%s.%s/24' % (domID, i, j),
                                     route='10.%s.%s.254' % (domID, i))
                 self.addLink(host, sw)
 
@@ -454,10 +454,10 @@ def returnNodeConnections(nodes, operSwNames,cocoSiteNames):
     return bighosttable
 
 def operswitch(element): #to pick only operator's switches
-        return ('-pc' in element) | ('-pe' in element) # no gateway switch needed in db| ('-gw' in element)
+        return ('_pc' in element) | ('_pe' in element) # no gateway switch needed in db| ('_gw' in element)
 
 def cocosite(element): #to pick only actual coco sites
-        return ('-ce' in element)
+        return ('_ce' in element)
 
 def databaseDump(net, domain):
 
@@ -632,11 +632,11 @@ def databaseDump(net, domain):
     cursor.execute(sql)
 
     if domain == 'MDCoCoTopoNorth':
-        gwSwitchID = operSwNames.index('tn-pe2') + 1
+        gwSwitchID = operSwNames.index('tn_pe2') + 1
         sql = """SELECT `id` FROM %s.ases WHERE  `as_name` LIKE 'tno-south';""" % DB_NAME
 
     if domain == 'MDCoCoTopoSouth':
-        gwSwitchID = operSwNames.index('ts-pe1') + 1
+        gwSwitchID = operSwNames.index('ts_pe1') + 1
         sql = """SELECT `id` FROM %s.ases WHERE  `as_name` LIKE 'tno-north';""" % DB_NAME
 
     cursor.execute(sql)
