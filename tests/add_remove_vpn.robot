@@ -1,6 +1,6 @@
 *** Settings ***
 Documentation     Test of invitation system    #TODOs    #-instead of bare curl consider using keywords such as Get Data From URI etc.    #-parametrize agent's address and port, possibly headers etc.
-Suite Setup       Start Suite
+Suite Setup       Start Suite    ${COCO_DOMAIN}
 Suite Teardown    Stop Suite
 Library           SSHLibrary
 Library           RequestsLibrary
@@ -11,21 +11,21 @@ Library           HttpLibrary.HTTP
 *** Variables ***
 ${COCO_IP}        localhost
 ${COCO_PORT}      9090
+${COCO_DIR}       /home/coco/demo_invitation
+${COCO_DOMAIN}    tn
 
 *** Test Cases ***
 login test
+    [Documentation]    See if mininet fired up correct topology
     Log    Start
+    Switch Connection    ${mininet_conn_id}
+    SSHLibrary.Write    net
+    ${output}    Read Until    mininet>
+    Log    ${output}
+    Should Contain    ${output}    ${COCO_DOMAIN}_bgp1
 
 intent bundle test
     Verify Feature Is Installed    odl-vpnservice-intent
-
-remove ARP flows
-    [Documentation]    Remove arp flows and check if indeed they are gone
-    Run Command On Mininet    ${TOOLS_SYSTEM_IP}    /home/coco/demo_bbf/del_arp_flows.sh    ${TOOLS_SYSTEM_USER}    ${TOOLS_SYSTEM_PASSWORD}    prompt=${TOOLS_SYSTEM_PROMPT}
-    #${output}    Read Until    ${TOOLS_SYSTEM_PROMPT}
-    ${output}    Run Command On Mininet    ${TOOLS_SYSTEM_IP}    /home/coco/demo_bbf/dumpflows_all.sh    ${TOOLS_SYSTEM_USER}    ${TOOLS_SYSTEM_PASSWORD}    prompt=${TOOLS_SYSTEM_PROMPT}
-    Log    ${output}
-    Should Not Contain    ${output}    arp
 
 Check for existing VPNs
     [Documentation]    Check if there are any VPNs
@@ -34,7 +34,6 @@ Check for existing VPNs
 
 Add VPN1
     [Documentation]    Adds (empty) VPN
-    #${tmpcmd}=    "curl 'http://localhost:9090/CoCo-agent/rest/vpn/add' -H 'Origin: http://localhost:9090' -H 'Accept-Encoding: gzip, deflate' -H 'Accept-Language: en-US,en;q=0.8' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36' -H 'Content-Type: application/json' -H 'Accept: application/json' -H 'Referer: http://localhost:9090/CoCo-agent/static/index.html' -H 'X-Requested-With: XMLHttpRequest' -H 'Connection: keep-alive' --data-binary '{"id":0,"name":"vpn1","pathProtection":false,"failoverType":"slow-reroute","sites":[]}' --compressed"
     Run Command On Mininet    ${TOOLS_SYSTEM_IP}    curl 'http://localhost:9090/CoCo-agent/rest/vpn/add' -H 'Origin: http://localhost:9090' -H 'Accept-Encoding: gzip, deflate' -H 'Accept-Language: en-US,en;q=0.8' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36' -H 'Content-Type: application/json' -H 'Accept: application/json' -H 'Referer: http://localhost:9090/CoCo-agent/static/index.html' -H 'X-Requested-With: XMLHttpRequest' -H 'Connection: keep-alive' --data-binary '{"id":0,"name":"vpn1","pathProtection":false,"failoverType":"slow-reroute","sites":[]}' --compressed    ${TOOLS_SYSTEM_USER}    ${TOOLS_SYSTEM_PASSWORD}    prompt=${TOOLS_SYSTEM_PROMPT}
 
 Get VPN1 ID
@@ -48,24 +47,17 @@ Get VPN1 ID
     Set Suite Variable    ${vpnid1}
 
 Add hosts to VPN1
-    Run Command On Mininet    ${TOOLS_SYSTEM_IP}    curl 'http://localhost:9090/CoCo-agent/rest/vpn/update/${vpnid1}' -H 'Origin: http://localhost:9090' -H 'Accept-Encoding: gzip, deflate' -H 'Accept-Language: en-US,en;q=0.8' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36' -H 'Content-Type: application/json' -H 'Accept: application/json' -H 'Referer: http://localhost:9090/CoCo-agent/static/index.html' -H 'X-Requested-With: XMLHttpRequest' -H 'Connection: keep-alive' --data-binary '{"id":${vpnid1},"sites":[{"id":1,"name":"h1"}]}' --compressed    ${TOOLS_SYSTEM_USER}    ${TOOLS_SYSTEM_PASSWORD}    prompt=${TOOLS_SYSTEM_PROMPT}
-    Run Command On Mininet    ${TOOLS_SYSTEM_IP}    curl 'http://localhost:9090/CoCo-agent/rest/vpn/update/${vpnid1}' -H 'Origin: http://localhost:9090' -H 'Accept-Encoding: gzip, deflate' -H 'Accept-Language: en-US,en;q=0.8' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36' -H 'Content-Type: application/json' -H 'Accept: application/json' -H 'Referer: http://localhost:9090/CoCo-agent/static/index.html' -H 'X-Requested-With: XMLHttpRequest' -H 'Connection: keep-alive' --data-binary '{"id":${vpnid1},"sites":[{"id":1,"name":"h1"},{"id":3,"name":"h3"}]}' --compressed    ${TOOLS_SYSTEM_USER}    ${TOOLS_SYSTEM_PASSWORD}    prompt=${TOOLS_SYSTEM_PROMPT}
+    #Run Command On Mininet    ${TOOLS_SYSTEM_IP}    curl 'http://localhost:9090/CoCo-agent/rest/vpn/update/${vpnid1}' -H 'Origin: http://localhost:9090' -H 'Accept-Encoding: gzip, deflate' -H 'Accept-Language: en-US,en;q=0.8' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36' -H 'Content-Type: application/json' -H 'Accept: application/json' -H 'Referer: http://localhost:9090/CoCo-agent/static/index.html' -H 'X-Requested-With: XMLHttpRequest' -H 'Connection: keep-alive' --data-binary '{"id":${vpnid1},"sites":[{"id":1,"name":"h1"}]}' --compressed    ${TOOLS_SYSTEM_USER}    ${TOOLS_SYSTEM_PASSWORD}    prompt=${TOOLS_SYSTEM_PROMPT}
+    #Run Command On Mininet    ${TOOLS_SYSTEM_IP}    curl 'http://localhost:9090/CoCo-agent/rest/vpn/update/${vpnid1}' -H 'Origin: http://localhost:9090' -H 'Accept-Encoding: gzip, deflate' -H 'Accept-Language: en-US,en;q=0.8' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36' -H 'Content-Type: application/json' -H 'Accept: application/json' -H 'Referer: http://localhost:9090/CoCo-agent/static/index.html' -H 'X-Requested-With: XMLHttpRequest' -H 'Connection: keep-alive' --data-binary '{"id":${vpnid1},"sites":[{"id":1,"name":"h1"},{"id":3,"name":"h3"}]}' --compressed    ${TOOLS_SYSTEM_USER}    ${TOOLS_SYSTEM_PASSWORD}    prompt=${TOOLS_SYSTEM_PROMPT}
+    Run Command On Mininet    ${TOOLS_SYSTEM_IP}    curl 'http://localhost:9090/CoCo-agent/rest/vpn/update/${vpnid1}' -H 'Origin: http://localhost:9090' -H 'Accept-Encoding: gzip, deflate' -H 'Accept-Language: en-US,en;q=0.8' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.82 Safari/537.36' -H 'Content-Type: application/json' -H 'Accept: application/json' -H 'Referer: http://localhost:9090/CoCo-agent/static/index.html' -H 'X-Requested-With: XMLHttpRequest' -H 'Connection: keep-alive' --data-binary '{"id":${vpnid1},"sites":[{"id":1,"name":"tn_ce1"},{"id":2,"name":"tn_ce2"}]}' --compressed    ${TOOLS_SYSTEM_USER}    ${TOOLS_SYSTEM_PASSWORD}    prompt=${TOOLS_SYSTEM_PROMPT}
 
 Ping hosts in VPN1
     [Documentation]    Ping should be successful
     Switch Connection    ${mininet_conn_id}
-    SSHLibrary.Write    h1 ping -c 5 h3
+    SSHLibrary.Write    tn_h11 ping -c 5 tn_h22
     ${output}    Read Until    mininet>
     Log    ${output}
     Should Contain    ${output}    5 received
-
-Ping hosts outside VPN1
-    [Documentation]    Ping should NOT successful - traffic should not leak
-    Switch Connection    ${mininet_conn_id}
-    SSHLibrary.Write    h1 ping -c 5 h2
-    ${output}    Read Until    mininet>
-    Log    ${output}
-    Should Contain    ${output}    100% packet loss
 
 Delete VPN1
     [Documentation]    Deletes VPN
@@ -77,23 +69,24 @@ Check for deleted VPNs
     Should Be Equal    ${output}    []
 
 Ping hosts in deleted VPN1
-    [Documentation]    Ping should NOT successful - VPN does not exist any more
+    [Documentation]    Ping should NOT be successful - VPN does not exist any more
     Switch Connection    ${mininet_conn_id}
-    SSHLibrary.Write    h1 ping -c 5 h3
+    SSHLibrary.Write    tn_h11 ping -c 5 tn_h22
     ${output}    Read Until    mininet>
     Log    ${output}
     Should Contain    ${output}    100% packet loss
 
-test json
-    [Tags]    test
-    ${tmpstr}=    Set Variable    [{"id":3,"name":"vpn1","pathProtection":"false","failoverType":"slow-reroute","sites":[],"pathProtectionBoolean":false}]
-    Log    ${tmpstr}
-    ${tmpstr2}=    Get Substring    ${tmpstr}    1    -1
-    Log    ${tmpstr2}
-    ${vpnid1}    Get Json Value    ${tmpstr2}    /id
-    Log    ${vpnid1}
-    #    Set Suite Variable    ${vpnid1}
-
-test json2
-    [Tags]    test
-    Log    ${vpnid1}
+*** Keywords ***
+Start Suite
+    [Arguments]    ${start}=    ${system}=${TOOLS_SYSTEM_IP}    ${user}=${TOOLS_SYSTEM_USER}    ${password}=${TOOLS_SYSTEM_PASSWORD}    ${prompt}=${DEFAULT_LINUX_PROMPT}    ${timeout}=30s
+    [Documentation]    Basic setup/cleanup work that can be done safely before any system
+    ...    is run.
+    Log    Start the test on the base edition
+    Clean Mininet System
+    ${mininet_conn_id}=    Open Connection    ${system}    prompt=${prompt}    timeout=${timeout}
+    Set Suite Variable    ${mininet_conn_id}
+    Flexible Mininet Login    user=${user}    password=${password}
+    Execute Command    sudo ovs-vsctl set-manager ptcp:6644
+    #Write    ${start}
+    Write    cd ${COCO_DIR} && ./mn${COCO_DOMAIN}.sh
+    Read Until    mininet>
