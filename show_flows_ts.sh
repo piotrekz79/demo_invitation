@@ -2,7 +2,7 @@
 
 #set -x
 
-for i in ts-pe1 ts-gw-tn
+for i in ts_pe1 ts_gw_tn
 do
 	echo $i
 	sudo ovs-ofctl -OOpenFlow13 dump-flows $i | sed '/goto/d' 
