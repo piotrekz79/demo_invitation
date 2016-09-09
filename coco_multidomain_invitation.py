@@ -21,6 +21,10 @@ QUAGGA_DIR = '/usr/sbin'
 QUAGGA_RUN_DIR = '/var/run/quagga'
 CONFIG_DIR = '/home/coco/demo_invitation/bgp_configs'
 
+EXABGP_DIR = '/usr/local/bin/exabgp'
+EXABGP_RUN_DIR = '/var/run/exabgp'
+EXABGP_LOG_DIR = '/var/log/exabgp'
+#/home/coco/demo_invitation/exabgp
 #mysql parameters
 DB_HOST="localhost"
 DB_USER="coco"
@@ -57,7 +61,7 @@ class PingableHost(Host):
         self.setARP(self.remoteIP, self.remoteMAC)
 
 
-class Router(Host):
+class QBGPRouter(Host):
     def __init__(self, name, quaggaConfFile, zebraConfFile, intfDict, ARPDict, *args, **kwargs):
         Host.__init__(self, name, *args, **kwargs)
 
@@ -104,7 +108,65 @@ class Router(Host):
                 self.setARP(attrs['nexthop'], attrs['remoteMAC'])
 
     def terminate(self):
-        self.cmd("ps ax | egrep 'bgpd%s.pid|zebra%s.pid' | awk '{print $1}' | xargs kill" % (self.name, self.name))
+        #I don't think it works because it does not read pid number
+        #self.cmd("ps ax | egrep 'bgpd%s.pid|zebra%s.pid' | awk '{print $1}' | xargs kill" % (self.name, self.name))
+        self.cmd("kill `cat %s/bgpd%s.pid`" % (QUAGGA_RUN_DIR, self.name))
+        self.cmd("kill `cat %s/zebra%s.pid`" % (QUAGGA_RUN_DIR, self.name))
+
+        Host.terminate(self)
+
+class EXABGPRouteReflector(Host):
+    def __init__(self, name, exabgpIniFile, exabgpConfFile, intfDict, ARPDict, *args, **kwargs):
+        Host.__init__(self, name, *args, **kwargs)
+
+        self.exabgpConfFile = exabgpConfFile
+        self.exabgpIniFile = exabgpIniFile
+        self.intfDict = intfDict
+        # TODO should be optional?
+        self.ARPDict = ARPDict
+
+    def config(self, **kwargs):
+        Host.config(self, **kwargs)
+        self.cmd('sysctl net.ipv4.ip_forward=1')
+
+        for intf, attrs in self.intfDict.items():
+            self.cmd('ip addr flush dev %s' % intf)
+            if 'mac' in attrs:
+                self.cmd('ip link set %s down' % intf)
+                self.cmd('ip link set %s address %s' % (intf, attrs['mac']))
+                self.cmd('ip link set %s up ' % intf)
+                self.nameToIntf[intf].mac=attrs['mac']
+            # for addr in attrs['ipAddrs']:
+            if 'vlan' in attrs:
+                # self.cmd('ip addr flush dev %s')
+                self.cmd('ip link add link %s name %s.%s type vlan id %s' % (intf, intf, attrs['vlan'], attrs['vlan']))
+                self.cmd('ip addr add %s dev %s.%s' % (attrs['ipAddrs'], intf, attrs['vlan']))
+                self.cmd('ip link set dev %s.%s up' % (intf, attrs['vlan']))
+            if ('ipAddrs' in attrs) & ('vlan' not in attrs):
+                self.cmd('ip addr add %s dev %s' % (attrs['ipAddrs'], intf))
+                self.nameToIntf[intf].ip=attrs['ipAddrs'].split('/')[0]
+                self.nameToIntf[intf].prefixLen=attrs['ipAddrs'].split('/')[1]
+
+
+        self.cmd('env exabgp.daemon.pid=%s/exabgp%s.pid exabgp.log.destination=%s/exabgp%s.log exabgp -e %s %s' %(
+            EXABGP_RUN_DIR, self.name, EXABGP_LOG_DIR, self.name, self.exabgpIniFile, self.exabgpConfFile
+        ))
+
+#        self.cmd('env exabgp.daemon.pid=%s/exabgp%s.pid exabgp -e %s %s' %(
+#            EXABGP_RUN_DIR, self.name, self.exabgpIniFile, self.exabgpConfFile
+#        ))
+
+        for attrs in self.ARPDict.itervalues():
+            if 'localdev' in attrs:
+                self.cmd('ip route add %s%s dev %s' % (attrs['remoteIP'], attrs['remoteMask'], attrs['localdev']))
+                self.setARP(attrs['remoteIP'], attrs['remoteMAC'])
+            elif 'nexthop' in attrs:
+                self.cmd('ip route add %s%s via %s' % (attrs['remoteIP'], attrs['remoteMask'], attrs['nexthop']))
+                self.setARP(attrs['nexthop'], attrs['remoteMAC'])
+
+    def terminate(self):
+        self.cmd("kill `cat %s/exabgp%s.pid`" % (EXABGP_RUN_DIR, self.name))
+
 
         Host.terminate(self)
 
@@ -178,9 +240,14 @@ class MDCoCoTopoNorth(Topo):
                        'tn_ce1_arp': tn_ce1_arp,
                        'tn_ce2_arp': tn_ce2_arp}
 
-        bgp = self.addHost("tn_bgp1", cls=Router,
-                           quaggaConfFile='%s/tn_bgp1.conf' % CONFIG_DIR,
-                           zebraConfFile=zebraConf,
+#        bgp = self.addHost("tn_bgp1", cls=QBGPRouter,
+#                           quaggaConfFile='%s/tn_bgp1.conf' % CONFIG_DIR,
+#                           zebraConfFile=zebraConf,
+#                           intfDict=bgpIntfs,
+#                           ARPDict=ARPBGPpeers)
+        bgp = self.addHost("tn_bgp1", cls=EXABGPRouteReflector,
+                           exabgpIniFile='%s/exabgp_config.ini' % CONFIG_DIR,
+                           exabgpConfFile='%s/exabgp_tn2_simplehttp.conf' % CONFIG_DIR,
                            intfDict=bgpIntfs,
                            ARPDict=ARPBGPpeers)
 
@@ -207,7 +274,7 @@ class MDCoCoTopoNorth(Topo):
 
             quaggaConf = '%s/tn_ce%s.conf' % (CONFIG_DIR, i)
 
-            router = self.addHost(name, cls=Router, quaggaConfFile=quaggaConf,
+            router = self.addHost(name, cls=QBGPRouter, quaggaConfFile=quaggaConf,
                                   zebraConfFile=zebraConf, intfDict=intfs, ARPDict=ARPfakegw)
             self.addLink(router, attachmentSwitches[i - 1])
 
@@ -294,7 +361,7 @@ class MDCoCoTopoSouth(Topo):
         ARPBGPpeers = {'tn_bgp1': tn_bgp1,
                        'ts_ce1': ts_ce1_arp}
 
-        bgp = self.addHost("ts_bgp1", cls=Router,
+        bgp = self.addHost("ts_bgp1", cls=QBGPRouter,
                            quaggaConfFile='%s/ts_bgp1.conf' % CONFIG_DIR,
                            zebraConfFile=zebraConf,
                            intfDict=bgpIntfs,
@@ -325,7 +392,7 @@ class MDCoCoTopoSouth(Topo):
 
             quaggaConf = '%s/ts_ce%s.conf' % (CONFIG_DIR, i)
 
-            router = self.addHost(name, cls=Router, quaggaConfFile=quaggaConf,
+            router = self.addHost(name, cls=QBGPRouter, quaggaConfFile=quaggaConf,
                                   zebraConfFile=zebraConf, intfDict=intfs, ARPDict=ARPfakegw)
             self.addLink(router, attachmentSwitches[i - 1])
 
