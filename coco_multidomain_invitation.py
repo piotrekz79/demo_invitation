@@ -361,9 +361,15 @@ class MDCoCoTopoSouth(Topo):
         ARPBGPpeers = {'tn_bgp1': tn_bgp1,
                        'ts_ce1': ts_ce1_arp}
 
-        bgp = self.addHost("ts_bgp1", cls=QBGPRouter,
-                           quaggaConfFile='%s/ts_bgp1.conf' % CONFIG_DIR,
-                           zebraConfFile=zebraConf,
+#        bgp = self.addHost("ts_bgp1", cls=QBGPRouter,
+#                           quaggaConfFile='%s/ts_bgp1.conf' % CONFIG_DIR,
+#                           zebraConfFile=zebraConf,
+#                           intfDict=bgpIntfs,
+#                           ARPDict=ARPBGPpeers)
+
+        bgp = self.addHost("ts_bgp1", cls=EXABGPRouteReflector,
+                           exabgpIniFile='%s/exabgp_config.ini' % CONFIG_DIR,
+                           exabgpConfFile='%s/exabgp_ts2_simplehttp.conf' % CONFIG_DIR,
                            intfDict=bgpIntfs,
                            ARPDict=ARPBGPpeers)
 
