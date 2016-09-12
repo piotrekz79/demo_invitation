@@ -165,6 +165,8 @@ class EXABGPRouteReflector(Host):
                 self.setARP(attrs['nexthop'], attrs['remoteMAC'])
 
     def terminate(self):
+        self.cmd("mv %s/exabgp%s.log %s/exabgp%s_`cat %s/exabgp%s.pid`.log" %(
+            EXABGP_LOG_DIR, self.name, EXABGP_LOG_DIR, self.name, EXABGP_RUN_DIR, self.name))
         self.cmd("kill `cat %s/exabgp%s.pid`" % (EXABGP_RUN_DIR, self.name))
 
 
