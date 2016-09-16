@@ -250,6 +250,7 @@ class MDCoCoTopoNorth(Topo):
         bgp = self.addHost("tn_bgp1", cls=EXABGPRouteReflector,
                            exabgpIniFile='%s/exabgp_config.ini' % CONFIG_DIR,
                            exabgpConfFile='%s/exabgp_tn2_simplehttp.conf' % CONFIG_DIR,
+#                           exabgpConfFile='%s/exabgp_tn2_api-add-remove.conf' % CONFIG_DIR,
                            intfDict=bgpIntfs,
                            ARPDict=ARPBGPpeers)
 

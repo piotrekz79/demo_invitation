@@ -34,3 +34,7 @@ curl --form "command=neighbor 10.2.0.1 withdraw route 2.2.0.0/24 next-hop 10.2.0
 
 curl --form "command=neighbor 10.2.0.1 announce route 2.2.0.0/24 next-hop  10.2.0.254 extended-community 0x0002FDE800000001 extended-community 0x8ABCBEEFDEADBEEF" http://10.10.10.1:5001/
 
+curl --form "command=neighbor 10.3.0.254 announce route 2.2.0.0/24 next-hop  10.2.0.254 extended-community 0x0002FDE800000001 extended-community 0x8ABCBEEFDEADBEEF" http://10.10.10.1:5001/
+curl --form "command=neighbor 10.3.0.254 announce route 2.2.0.0/24 next-hop  10.2.0.254 extended-community 0x0002FDE800000001 extended-community 0x8ABCBEEFDEADBEEF" http://10.10.10.1:5001/
+
+
