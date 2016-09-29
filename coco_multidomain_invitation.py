@@ -208,6 +208,8 @@ class MDCoCoTopoNorth(Topo):
         self.addLink(tn_pe2, pinghost)
 
         zebraConf = '%s/zebra.conf' % CONFIG_DIR
+        exabgpIni = '%s/exabgp_config.ini' % CONFIG_DIR
+        exabgpConf = '%s/exabgp_tn2_to_ts2_simplehttp_post-to-portal' % CONFIG_DIR
 
         # Switches we want to attach our routers to, in the correct order
         attachmentSwitches = [tn_pe1, tn_pe2]
@@ -248,9 +250,8 @@ class MDCoCoTopoNorth(Topo):
 #                           intfDict=bgpIntfs,
 #                           ARPDict=ARPBGPpeers)
         bgp = self.addHost("tn_bgp1", cls=EXABGPRouteReflector,
-                           exabgpIniFile='%s/exabgp_config.ini' % CONFIG_DIR,
-                           exabgpConfFile='%s/exabgp_tn2_simplehttp.conf' % CONFIG_DIR,
-#                           exabgpConfFile='%s/exabgp_tn2_api-add-remove.conf' % CONFIG_DIR,
+                           exabgpIniFile=exabgpIni,
+                           exabgpConfFile=exabgpConf,
                            intfDict=bgpIntfs,
                            ARPDict=ARPBGPpeers)
 
@@ -337,6 +338,8 @@ class MDCoCoTopoSouth(Topo):
         self.addLink(ts_pe1, pinghost)
 
         zebraConf = '%s/zebra.conf' % CONFIG_DIR
+        exabgpIni = '%s/exabgp_config.ini' % CONFIG_DIR
+        exabgpConf = '%s/exabgp_ts2_to_tn2_simplehttp_post-to-portal' % CONFIG_DIR
 
         # Switches we want to attach our routers to, in the correct order
         attachmentSwitches = [ts_pe1]
@@ -371,8 +374,8 @@ class MDCoCoTopoSouth(Topo):
 #                           ARPDict=ARPBGPpeers)
 
         bgp = self.addHost("ts_bgp1", cls=EXABGPRouteReflector,
-                           exabgpIniFile='%s/exabgp_config.ini' % CONFIG_DIR,
-                           exabgpConfFile='%s/exabgp_ts2_simplehttp.conf' % CONFIG_DIR,
+                           exabgpIniFile=exabgpIni,
+                           exabgpConfFile=exabgpConf,
                            intfDict=bgpIntfs,
                            ARPDict=ARPBGPpeers)
 
