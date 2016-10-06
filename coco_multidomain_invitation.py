@@ -209,7 +209,7 @@ class MDCoCoTopoNorth(Topo):
 
         zebraConf = '%s/zebra.conf' % CONFIG_DIR
         exabgpIni = '%s/exabgp_config.ini' % CONFIG_DIR
-        exabgpConf = '%s/exabgp_tn2_to_ts2_simplehttp_post-to-portal' % CONFIG_DIR
+        exabgpConf = '%s/exabgp_tn2_to_ts2_simplehttp_post-to-portal.conf' % CONFIG_DIR
 
         # Switches we want to attach our routers to, in the correct order
         attachmentSwitches = [tn_pe1, tn_pe2]
@@ -339,7 +339,7 @@ class MDCoCoTopoSouth(Topo):
 
         zebraConf = '%s/zebra.conf' % CONFIG_DIR
         exabgpIni = '%s/exabgp_config.ini' % CONFIG_DIR
-        exabgpConf = '%s/exabgp_ts2_to_tn2_simplehttp_post-to-portal' % CONFIG_DIR
+        exabgpConf = '%s/exabgp_ts2_to_tn2_simplehttp_post-to-portal.conf' % CONFIG_DIR
 
         # Switches we want to attach our routers to, in the correct order
         attachmentSwitches = [ts_pe1]
