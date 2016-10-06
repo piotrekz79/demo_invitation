@@ -28,6 +28,17 @@ Demo
 
  sudo apt-get install libmysqlclient-dev
 
+ exabgp will need this for communication with portal 
+
+ sudo pip install httplib2
+
+[DEBUG] to run test server
+ sudo pip install tornado
+ then run
+ /home/coco/demo_invitation/exabgp_tmpdev/tornado-web.py
+ this server listens on 5003 and accepts POST and dumps them to the console
+ it pretends to be a portal module which will really 
+ accept and process updates from BGP
 
 4. Start mininet with predefined topologies
 
@@ -50,7 +61,15 @@ Demo
 
 
 
+5. Starting minites starts also exabgp route reflector (within a domain). It accepts REST calls on http://10.10.10.1:5001
+which will originate from portal
 
+[DEBUG]
+To test, issue on tn
+
+curl --form "command=neighbor 10.3.0.254 announce route 2.2.0.0/24 next-hop 10.2.0.254 extended-community 0x0002FDE800000001 extended-community 0x8ABCBEEFDEADBEEF" http://10.10.10.1:5001/
+
+on ts tornado server we should see json string with the BGP update
 
 
 

@@ -11,7 +11,7 @@ import json
 #portalURL = 'http://localhost:5003'
 portalURL = 'http://10.10.10.2:5003'
 
-#fire up ~/demo_invitation/webserver/tornado-web.py  for tests
+#fire up ~/demo_invitation/exabgp_tmpdev/tornado-web.py  for tests
 
 
 

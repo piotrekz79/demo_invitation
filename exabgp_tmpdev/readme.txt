@@ -38,7 +38,7 @@ curl --form "command=neighbor 10.3.0.254 announce route 2.2.0.0/24 next-hop  10.
 curl --form "command=neighbor 10.3.0.254 announce route 2.2.0.0/24 next-hop  10.2.0.254 extended-community 0x0002FDE800000001 extended-community 0x8ABCBEEFDEADBEEF" http://10.10.10.1:5001/
 
 
-curl --form "command=neighbor 134.221.121.201 announce route 166.10.0.0/24 next-hop self" http://localhost:5001/
+curl --form "command=neighbor 134.221.121.201 announce route 5.10.15.0/24 next-hop self extended-community 0x0002FDE800000001 extended-community 0x8ABCBEEFDEADBEEF" http://localhost:5001/
 
 
 5) version which accepts REST calls and forwards route updates to a (fake) portal
