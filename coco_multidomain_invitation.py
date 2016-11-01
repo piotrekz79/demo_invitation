@@ -19,7 +19,7 @@ import sys
 QUAGGA_DIR = '/usr/sbin'
 # Must exist and be owned by quagga user (quagga:quagga by default on Ubuntu)
 QUAGGA_RUN_DIR = '/var/run/quagga'
-CONFIG_DIR = '/home/coco/demo_invitation/bgp_configs'
+CONFIG_DIR = '/home/coco/pz/demo_invitation/bgp_configs'
 
 EXABGP_DIR = '/usr/local/bin/exabgp'
 EXABGP_RUN_DIR = '/var/run/exabgp'

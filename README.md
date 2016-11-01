@@ -3,16 +3,19 @@
 This is a demonstration of multidomain CoCo with email-based VPN invitation system.
 Under the hood, vpnintent framework is used.
 
-
+Works on
+.202 (TN2) & .201 (TS2)
 Demo
 1. Start ODL controller
- /home/coco/vpnservice-karaf-intent/distribution-karaf-0.4.2-Berylium-SR2-clean/bin/karaf
+ /home/coco/distribution-karaf-0.4.2-Berylium-SR2/bin/karaf
 
  needed features are
 
  feature:install odl-vpn-service-intent
  feature:install odl-dlux-all
 
+If the controller fails, in check
+~/install_scripts/install-odl-intent.sh
 
 2. start mysql server ( if not running already: sudo service mysql status )
 
@@ -28,14 +31,18 @@ Demo
 
  sudo apt-get install libmysqlclient-dev
 
+ sudo pip install exabgp
+ 
  exabgp will need this for communication with portal 
 
  sudo pip install httplib2
 
 [DEBUG] to run test server
  sudo pip install tornado
- then run
- /home/coco/demo_invitation/exabgp_tmpdev/tornado-web.py
+ then run on TS (.201)
+
+ ./exabgp_tmpdev/tornado-web.py
+
  this server listens on 5003 and accepts POST and dumps them to the console
  it pretends to be a portal module which will really 
  accept and process updates from BGP
@@ -43,14 +50,14 @@ Demo
 4. Start mininet with predefined topologies
 
 
- To run TNO North topology, start
+ To run TNO North topology, start (on .202)
  ./mntn.sh
 
  then to add initial configuration (BGP flows, GRE), run
  ./tnflows_gw.sh
 
 
- To run TNO North topology, start
+ To run TNO North topology, start (on .201)
  ./mnts.sh
 
  then to add initial configuration (BGP flows, GRE), run
@@ -65,11 +72,11 @@ Demo
 which will originate from portal
 
 [DEBUG]
-To test, issue on tn
+To test, issue on TN 
 
 curl --form "command=neighbor 10.3.0.254 announce route 2.2.0.0/24 next-hop 10.2.0.254 extended-community 0x0002FDE800000001 extended-community 0x8ABCBEEFDEADBEEF" http://10.10.10.1:5001/
 
-on ts tornado server we should see json string with the BGP update
+on TS tornado server we should see json string with the BGP update
 
 
 
