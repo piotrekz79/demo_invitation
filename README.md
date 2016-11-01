@@ -74,10 +74,14 @@ which will originate from portal
 [DEBUG]
 To test, issue on TN 
 
-curl --form "command=neighbor 10.3.0.254 announce route 2.2.0.0/24 next-hop 10.2.0.254 extended-community 0x0002FDE800000001 extended-community 0x8ABCBEEFDEADBEEF" http://10.10.10.1:5001/
+curl --form "command=neighbor 10.3.0.254 announce route 10.2.1.128/25 next-hop 10.2.0.254 extended-community 0x0002FDE800000001 extended-community 0x8ABCBEEFDEADBEEF" http://10.10.10.1:5001/
 
-on TS tornado server we should see json string with the BGP update
+on TS tornado server we should see json string with the BGP update (note ext-community strings were converted from hex to (long)int, first two bytes are type and subtype so for nonce we can use 6B only, not 8B
 
+=======REQUEST=======
+HTTPServerRequest(protocol='http', host='10.10.10.2:5003', method='POST', uri='/', version='HTTP/1.1', remote_ip='10.10.10.1', headers={'Host': '10.10.10.2:5003', 'Content-Type': 'application/json; charset=UTF-8', 'Content-Length': '512', 'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'Python-httplib2/0.9.2 (gzip)'})
+=======REQUEST BODY=======
+'{ "exabgp": "3.4.8", "time": 1478009901, "host" : "TS2-ODL", "pid" : "2009", "ppid" : "1", "counter": 94, "type": "update", "neighbor": { "ip": "10.2.0.254", "address": { "local": "10.3.0.254", "peer": "10.2.0.254"}, "asn": { "local": "65030", "peer": "65020"}, "message": { "update": { "attribute": { "origin": "igp", "as-path": [ 65020 ], "confederation-path": [], "extended-community": [ 842122827661313, 9997075210298048239 ] }, "announce": { "ipv4 unicast": { "10.2.0.254": { "10.2.1.128/25": {  } } } } } }} }'
 
 
 
