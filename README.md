@@ -84,10 +84,18 @@ HTTPServerRequest(protocol='http', host='10.10.10.2:5003', method='POST', uri='/
 '{ "exabgp": "3.4.8", "time": 1478009901, "host" : "TS2-ODL", "pid" : "2009", "ppid" : "1", "counter": 94, "type": "update", "neighbor": { "ip": "10.2.0.254", "address": { "local": "10.3.0.254", "peer": "10.2.0.254"}, "asn": { "local": "65030", "peer": "65020"}, "message": { "update": { "attribute": { "origin": "igp", "as-path": [ 65020 ], "confederation-path": [], "extended-community": [ 842122827661313, 9997075210298048239 ] }, "announce": { "ipv4 unicast": { "10.2.0.254": { "10.2.1.128/25": {  } } } } } }} }'
 
 
+curl --form "command=neighbor 10.3.0.254 announce route 10.2.1.0/25 next-hop self extended-community 0x0002FDE800000001 extended-community 0xC0C0BEEFDEADBEEF" http://10.10.10.1:5001/
 
+#0002 : route target
+#FDFC : AS65020
+#00000001 : 1st VPN so RT can be written as 65020:1
 
+#C0C0 : experimatal extended community (rfc4360, p. 8)
+#BEEFDEADBEEF : 6B token (nonce)
 
-
+in case of problems with exabgp
+kill -KILLALL exabgp
+assure /var/run/exabgp has no pid file if exa is not supposed to be running
 
 === GARBAGE
  Demo
